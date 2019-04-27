@@ -2,7 +2,6 @@
 
 namespace DokkuLaravel;
 
-use eftec\bladeone\BladeOne;
 use RuntimeException;
 
 class InstallLaravel
