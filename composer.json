@@ -1,0 +1,26 @@
+{
+  "name": "slava-vishnyakov/dokku-laravel",
+  "description": "Creates Laravel app for Dokku",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Slava Vishnyakov",
+      "email": "bomboze@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "DokkuLaravel\\": "src/"
+    }
+  },
+  "require": {
+    "ext-zip": "*",
+    "guzzlehttp/guzzle": "~6.0",
+    "symfony/console": "~3.0|~4.0",
+    "symfony/filesystem": "~3.0|~4.0",
+    "symfony/process": "~3.0|~4.0"
+  },
+  "bin": [
+    "dokku-laravel"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "dokku": {
+      "predeploy": "php artisan migrate --no-interaction --force"
+    }
+  }
+}
