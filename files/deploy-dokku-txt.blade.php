@@ -85,10 +85,24 @@ notifempty
 create 0640 32767 32767
 }" | sudo tee /etc/logrotate.d/laravel;
 
+sudo mkdir /var/www/tls/
+openssl req -newkey rsa:2048 -nodes -keyout /var/www/tls/snakeoil-key.pem -x509 -days 3650 -out /var/www/tls/snakeoil-certificate.pem
+
 echo -e "server {
 listen 80 default_server;
 server_name _;
 access_log off;
+return 410;
+}
+
+server {
+listen 443 ssl http2 default_server;
+listen [::]:443 ssl http2 default_server ipv6only=on;
+server_name _;
+ssl_certificate /var/www/tls/snakeoil-certificate.pem;
+ssl_certificate_key /var/www/tls/snakeoil-key.pem;
+server_name_in_redirect off;
+log_not_found off;
 return 410;
 }"  | sudo tee /etc/nginx/conf.d/00-default-vhost.conf;
 
