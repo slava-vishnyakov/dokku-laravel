@@ -65,6 +65,7 @@ dokku redis:link {{ $domainUnderscores }} {{ $domain }}
 # delete or rename the Illuminate\Support\Facades\Redis facade alias from config/app.php aliases array
 dokku config:set --no-restart {{ $domain }} REDIS_CLIENT="predis"
 # add REDIS_CLIENT=predis to local .env
+# add REDIS_URL=redis://localhost:6379 to local .env
 
 # Queue (after first deploy)
 # First, install and link redis (see above)
