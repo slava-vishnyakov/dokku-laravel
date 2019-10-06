@@ -85,8 +85,8 @@ class InstallLaravel
     public function updateEnv($postgresPort)
     {
         $dbFragment = "DATABASE_URL=postgres://webapp:secret@localhost:$postgresPort/webapp?sslmode=disable";
-        $this->fileReplaceBetween($this->projectName . '/.env.example', 'DB_CONNECTION', 'DB_PASSWORD=', $dbFragment);
-        $this->fileReplaceBetween($this->projectName . '/.env', 'DB_CONNECTION', 'DB_PASSWORD=', $dbFragment);
+        $this->fileReplaceBetween($this->projectName . '/.env.example', 'DB_CONNECTION', 'DB_PASSWORD=', "{$dbFragment}\n");
+        $this->fileReplaceBetween($this->projectName . '/.env', 'DB_CONNECTION', 'DB_PASSWORD=', "{$dbFragment}\n");
     }
 
     public function createDockerCompose($postgresPort, $postgresVersion, $testDbPostgresPort)
