@@ -112,6 +112,8 @@ log_not_found off;
 return 410;
 }"  | sudo tee /etc/nginx/conf.d/00-default-vhost.conf;
 
+service nginx reload
+
 # Add LetsEncrypt
 dokku config:set --no-restart {{ $domain }} DOKKU_LETSENCRYPT_EMAIL=****
 dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
