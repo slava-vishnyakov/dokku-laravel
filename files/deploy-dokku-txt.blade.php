@@ -1,6 +1,6 @@
 # ssh {{ $domain }}; sudo -i
 
-#Install dokku
+# Install dokku
 export VERSION=$(curl -s https://github.com/dokku/dokku/releases/latest | cut -d '/' -f 8 | cut -d '"' -f 1)
 echo $VERSION
 wget https://raw.githubusercontent.com/dokku/dokku/$VERSION/bootstrap.sh;
@@ -26,7 +26,8 @@ dokku storage:mount {{ $domain }} /home/dokku/{{ $domain }}/volumes/storage/fram
 dokku storage:mount {{ $domain }} /home/dokku/{{ $domain }}/volumes/storage/framework/views/:/app/storage/framework/views/
 dokku checks:disable {{ $domain }} web
 
-# dokku storage:mount {{ $domain }} /home/dokku/{{ $domain }}/volumes/public/persistent/:/app/public/persistent/
+# If you want to use public storage provided by php artisan storage:link
+# dokku storage:mount {{ $domain }} /home/dokku/{{ $domain }}/volumes/public/storage/:/app/storage/app/public/
 
 # MailGun
 dokku config:set --no-restart {{ $domain }} MAIL_DRIVER="mailgun"
@@ -44,32 +45,32 @@ dokku postgres:link {{ $domainUnderscores }} {{ $domain }}
 # ElasticSearch 6
 echo 'vm.max_map_count=262144' | sudo tee -a /etc/sysctl.conf; sudo sysctl -p
 sudo dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elasticsearch
-# https://github.com/dokku/dokku-elasticsearch/pull/64
 export ELASTICSEARCH_IMAGE="docker.elastic.co/elasticsearch/elasticsearch"
 export ELASTICSEARCH_IMAGE_VERSION="6.6.0"
 dokku elasticsearch:create {{ $domainUnderscores }}
 dokku elasticsearch:link {{ $domainUnderscores }} {{ $domain }}
-dokku config:set {{ $domain }} ELASTICSEARCH_INDEX={{ $domainUnderscores }}
 
 # Redis
 dokku plugin:install https://github.com/dokku/dokku-redis.git redis
 dokku redis:create {{ $domainUnderscores }}
 dokku redis:link {{ $domainUnderscores }} {{ $domain }}
 # locally: composer require predis/predis
-# config/database.php change in 2 places:
+# Change 'config/database.php' file in 2 places:
 # $redis = getenv("REDIS_URL") ? parse_url(getenv("REDIS_URL")) : [];
 # 'host' => data_get($redis, 'host', env('REDIS_HOST', '127.0.0.1')),
 # 'password' => data_get($redis, 'pass', env('REDIS_PASSWORD', null)),
 # 'port' => data_get($redis, 'port', env('REDIS_PORT', 6379)),
 
 # Queue
-# install, link redis
+# First, install and link redis (see above)
 dokku config:set --no-restart {{ $domain }} QUEUE_CONNECTION=redis
 sudo vi /home/dokku/{{ $domain }}/hooks/pre-receive
 # add before git-hook
 dokku enter {{ $domain }} cron touch /app/restarting || echo "Could not touch /app/restarting on cron"
 dokku enter {{ $domain }} queue php artisan queue:restart || echo "Could not send queue:restart to queue"
 
+# Now we're ready to deploy
+# Run locally:
 # git init; echo .idea >> .gitignore; git add .; git commit -m "Initial commit"
 # git remote add {{ $domain }} dokku@{{ $domain }}:{{ $domain }}
 # git push {{ $domain }} master
@@ -77,6 +78,7 @@ dokku enter {{ $domain }} queue php artisan queue:restart || echo "Could not sen
 dokku checks:enable {{ $domain }} web
 dokku checks:skip {{ $domain }} cron,queue
 
+# Fix log rotation
 echo -e "/home/dokku/*/volumes/storage/logs/laravel*.log {
 daily
 missingok
@@ -87,16 +89,16 @@ notifempty
 create 0640 32767 32767
 }" | sudo tee /etc/logrotate.d/laravel;
 
+# Fix nginx default host
+# - generate fake certificate
 sudo mkdir /var/www/tls/
 openssl req -newkey rsa:2048 -nodes -keyout /var/www/tls/snakeoil-key.pem -x509 -days 3650 -out /var/www/tls/snakeoil-certificate.pem
-
 echo -e "server {
 listen 80 default_server;
 server_name _;
 access_log off;
 return 410;
 }
-
 server {
 listen 443 ssl http2 default_server;
 listen [::]:443 ssl http2 default_server ipv6only=on;
@@ -108,15 +110,32 @@ log_not_found off;
 return 410;
 }"  | sudo tee /etc/nginx/conf.d/00-default-vhost.conf;
 
-# LetsEncrypt
+# Add LetsEncrypt
 dokku config:set --no-restart {{ $domain }} DOKKU_LETSENCRYPT_EMAIL=****
 dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
 dokku letsencrypt {{ $domain }}
 dokku config:set --no-restart {{ $domain }} APP_URL=https://{{ $domain }}
 dokku letsencrypt:cron-job --add
 
-# Slack
+# Logs
+less /home/dokku/{{ $domain }}/volumes/storage/logs/laravel.log
+dokku logs {{ $domain }} -t
 
+# Tinker
+dokku run {{ $domain }} php artisan tinker
+dokku enter {{ $domain }} web php artisan tinker
+
+# Run additional process
+use DOKKU_SCALE file
+
+# Postgres
+dokku postgres:connect {{ $domain }}
+
+# Destroy (if needed!!)
+# rm -rf /home/dokku/{{ $domain }}/volumes/storage; dokku apps:destroy {{ $domain }} --force
+
+
+# Slack
 dokku config:set {{ $domain }} LOG_SLACK_WEBHOOK_URL=....
 
 --- app/Exceptions/Handler.php add to report()
@@ -130,20 +149,3 @@ return 1;
 });
 }
 ---
-
-# Logs
-less /home/dokku/{{ $domain }}/volumes/storage/logs/laravel.log
-dokku logs {{ $domain }} -t
-
-# Tinker
-dokku run {{ $domain }} php artisan tinker
-dokku enter {{ $domain }} web php artisan tinker
-
-# Run a process
-use DOKKU_SCALE file
-
-# Postgres
-dokku postgres:connect {{ $domain }}
-
-# Destroy (if needed!!)
-# rm -rf /home/dokku/{{ $domain }}/volumes/storage; dokku apps:destroy {{ $domain }} --force
