@@ -1,8 +1,10 @@
 # ssh {{ $domain }}; sudo -i
 
 #Install dokku
-wget https://raw.githubusercontent.com/dokku/dokku/v0.15.5/bootstrap.sh;
-sudo DOKKU_TAG=v0.15.5 bash bootstrap.sh
+export VERSION=$(curl -s https://github.com/dokku/dokku/releases/latest | cut -d '/' -f 8 | cut -d '"' -f 1)
+echo $VERSION
+wget https://raw.githubusercontent.com/dokku/dokku/$VERSION/bootstrap.sh;
+sudo DOKKU_TAG=$VERSION bash bootstrap.sh
 
 # Install app
 dokku apps:create {{ $domain }}
