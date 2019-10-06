@@ -55,13 +55,15 @@ dokku plugin:install https://github.com/dokku/dokku-redis.git redis
 dokku redis:create {{ $domainUnderscores }}
 dokku redis:link {{ $domainUnderscores }} {{ $domain }}
 # locally: composer require predis/predis
-# Change 'config/database.php' file in 2 places:
+# Change 'config/database.php'
+# add this line after $db = ...
 # $redis = getenv("REDIS_URL") ? parse_url(getenv("REDIS_URL")) : [];
+# change this in redis section (in 2 places)
 # 'host' => data_get($redis, 'host', env('REDIS_HOST', '127.0.0.1')),
 # 'password' => data_get($redis, 'pass', env('REDIS_PASSWORD', null)),
 # 'port' => data_get($redis, 'port', env('REDIS_PORT', 6379)),
 
-# Queue
+# Queue (after first deploy)
 # First, install and link redis (see above)
 dokku config:set --no-restart {{ $domain }} QUEUE_CONNECTION=redis
 sudo vi /home/dokku/{{ $domain }}/hooks/pre-receive
