@@ -62,6 +62,9 @@ dokku redis:link {{ $domainUnderscores }} {{ $domain }}
 # 'host' => data_get($redis, 'host', env('REDIS_HOST', '127.0.0.1')),
 # 'password' => data_get($redis, 'pass', env('REDIS_PASSWORD', null)),
 # 'port' => data_get($redis, 'port', env('REDIS_PORT', 6379)),
+# delete or rename the Illuminate\Support\Facades\Redis facade alias from config/app.php aliases array
+dokku config:set --no-restart {{ $domain }} REDIS_CLIENT="predis"
+# add REDIS_CLIENT=predis to local .env
 
 # Queue (after first deploy)
 # First, install and link redis (see above)
