@@ -46,7 +46,7 @@ dokku postgres:link {{ $domainUnderscores }} {{ $domain }}
 echo 'vm.max_map_count=262144' | sudo tee -a /etc/sysctl.conf; sudo sysctl -p
 sudo dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elasticsearch
 export ELASTICSEARCH_IMAGE="docker.elastic.co/elasticsearch/elasticsearch"
-export ELASTICSEARCH_IMAGE_VERSION="6.8.1"
+export ELASTICSEARCH_IMAGE_VERSION="6.6.0"
 dokku elasticsearch:create {{ $domainUnderscores }}
 dokku elasticsearch:link {{ $domainUnderscores }} {{ $domain }}
 
