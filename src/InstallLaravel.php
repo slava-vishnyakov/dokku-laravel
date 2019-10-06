@@ -18,7 +18,7 @@ class InstallLaravel
 
     public function run()
     {
-        $postgresVersion = '11.2';
+        $postgresVersion = '11.4';
         $postgresPort = mt_rand(5234, 5600);
         $testDbPostgresPort = $postgresPort + 1;
 
