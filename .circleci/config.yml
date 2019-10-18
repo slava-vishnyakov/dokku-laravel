@@ -1,3 +1,15 @@
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - build
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+    jobs:
+      - build
+
 version: 2
 jobs:
   build:
@@ -7,7 +19,7 @@ jobs:
     steps:
       - checkout
       - run: sudo apt update
-      - run: (yes | sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php); true
+      - run: sudo LC_ALL=en_US.UTF-8 add-apt-repository -y ppa:ondrej/php
       - run: sudo apt-get update
       - run: sudo apt-get install -y php7.3
       - run: sudo apt install curl php-cli php-mbstring php-pgsql php-zip php-xml php-mbstring git unzip
