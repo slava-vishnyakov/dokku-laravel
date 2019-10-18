@@ -43,8 +43,9 @@ jobs:
             /home/circleci/project/dokku-laravel new project1 project1;
             cd project1
       - run: cd /home/circleci/project1 && docker-compose up -d
-      - run: cd /home/circleci/project1 && php artisan serve
+      - run: (cd /home/circleci/project1 && nohup php artisan serve > /home/circleci/project1/serve.log) &
       - run: sleep 20
+      - run: cat /home/circleci/project1/serve.log
       - run: curl -s 127.0.0.1:8000
       - run: (curl -s 127.0.0.1:8000 | grep Laravel) || false
       - run: cd /home/circleci/project1 && php artisan migrate
