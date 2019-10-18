@@ -24,6 +24,7 @@ jobs:
       - run: project/dokku-laravel new project1 project1
       - run: cd project1
       - run: docker-compose up -d
+      - run: sleep 10
       - run: php artisan serve &
       - run: (curl -s 127.0.0.1:8000 | grep Laravel) || false
       - run: php artisan migrate
