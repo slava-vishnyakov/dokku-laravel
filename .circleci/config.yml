@@ -25,12 +25,12 @@ jobs:
       - run: sudo apt update
       - run: sudo LC_ALL=en_US.UTF-8 add-apt-repository -y ppa:ondrej/php
       - run: sudo apt-get update
-      - run: sudo apt-get install -y php7.3
       - run: sudo apt install curl php-cli php-mbstring php-pgsql php-zip php-xml php-mbstring git unzip
       - run: which php; php -v
-      - run: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"; \
-          php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e849a443b120cd5ba38043260d5c4023dbf93e1558871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"; \
-          sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer; \
+      - run: |
+          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');";
+          php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e849a443b120cd5ba38043260d5c4023dbf93e1558871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;";
+          sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer;
           php -r "unlink('composer-setup.php');"
       - run: cd /home/circleci/project
       - run: composer install
