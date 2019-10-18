@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - run: sudo apt update
-      - run: (yes | sudo add-apt-repository ppa:ondrej/php); true
+      - run: (yes | sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php); true
       - run: sudo apt-get update
       - run: sudo apt-get install -y php7.3
       - run: sudo apt install curl php-cli php-mbstring php-pgsql php-zip php-xml php-mbstring git unzip
