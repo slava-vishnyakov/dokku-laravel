@@ -49,6 +49,10 @@ export ELASTICSEARCH_IMAGE="docker.elastic.co/elasticsearch/elasticsearch"
 export ELASTICSEARCH_IMAGE_VERSION="6.6.0"
 dokku elasticsearch:create {{ $domainUnderscores }}
 dokku elasticsearch:link {{ $domainUnderscores }} {{ $domain }}
+# connect as
+# $es = parse_url(env('ELASTICSEARCH_URL'));
+# $builder = ClientBuilder::create();
+# $builder->setHosts(["$es[host]:$es[port]"]);
 
 # Redis
 dokku plugin:install https://github.com/dokku/dokku-redis.git redis

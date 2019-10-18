@@ -51,6 +51,13 @@ class InstallLaravel
         file_put_contents($filename, $newContent);
     }
 
+    function fileReplace($filename, $search, $replace)
+    {
+        $text = file_get_contents($filename);
+        $newContent = str_replace($search, $replace, $text);
+        file_put_contents($filename, $newContent);
+    }
+
     function fileInsertAfter($filename, $start, $replace)
     {
         $text = file_get_contents($filename);
@@ -87,6 +94,7 @@ class InstallLaravel
         $dbFragment = "DATABASE_URL=postgres://webapp:secret@localhost:$postgresPort/webapp?sslmode=disable";
         $this->fileReplaceBetween($this->projectName . '/.env.example', 'DB_CONNECTION', 'DB_PASSWORD=', "{$dbFragment}\n");
         $this->fileReplaceBetween($this->projectName . '/.env', 'DB_CONNECTION', 'DB_PASSWORD=', "{$dbFragment}\n");
+        $this->fileReplace($this->projectName . '/.env', "DB_PASSWORD=\n", "");
     }
 
     public function createDockerCompose($postgresPort, $postgresVersion, $testDbPostgresPort)
