@@ -7,3 +7,25 @@ jobs:
     steps:
       - checkout
       - run: sudo apt update
+      - run: yes | sudo add-apt-repository ppa:ondrej/php
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y php7.3
+      - run: sudo apt install curl php-cli php-mbstring php-pgsql php-zip php-xml php-mbstring git unzip
+      - run: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"; \
+          php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e849a443b120cd5ba38043260d5c4023dbf93e1558871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"; \
+          sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer; \
+          php -r "unlink('composer-setup.php');"
+      - run: cd /home/circleci/project
+      - run: composer install
+      - run: cd /home/circleci
+      - run: sudo rm -rf /home/circleci/.composer
+      - run: composer global require laravel/installer
+      - run: export PATH="$PATH:$HOME/.config/composer/vendor/bin"
+      - run: project/dokku-laravel new project1 project1
+      - run: cd project1
+      - run: docker-compose up -d
+      - run: php artisan serve &
+      - run: (curl -s 127.0.0.1:8000 | grep Laravel) || false
+      - run: php artisan migrate
+      - run: echo '<?php echo App\User::count(); ?> users' > resources/views/welcome.blade.php
+      - run: (curl -s 127.0.0.1:8000 | grep '0 users') || false
