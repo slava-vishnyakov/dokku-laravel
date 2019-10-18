@@ -44,14 +44,14 @@ jobs:
             cd project1
       - run: cd /home/circleci/project1 && docker-compose up -d
       - run: |
-        (cd /home/circleci/project1 && php artisan serve ) &
-        sleep 20;
-        cat /home/circleci/project1/serve.log;
-        curl -s 127.0.0.1:8000;
-        (curl -s 127.0.0.1:8000 | grep Laravel) || false;
+            (cd /home/circleci/project1 && php artisan serve ) &
+            sleep 20;
+            cat /home/circleci/project1/serve.log;
+            curl -s 127.0.0.1:8000;
+            (curl -s 127.0.0.1:8000 | grep Laravel) || false;
       - run: |
-        cd /home/circleci/project1 && php artisan migrate;
-        (cd /home/circleci/project1 && php artisan serve ) &
-        echo '<?php echo App\User::count(); ?> users' > /home/circleci/resources/views/welcome.blade.php;
-        curl -s 127.0.0.1:8000;
-        (curl -s 127.0.0.1:8000 | grep '0 users') || false;
+            cd /home/circleci/project1 && php artisan migrate;
+            (cd /home/circleci/project1 && php artisan serve ) &
+            echo '<?php echo App\User::count(); ?> users' > /home/circleci/resources/views/welcome.blade.php;
+            curl -s 127.0.0.1:8000;
+            (curl -s 127.0.0.1:8000 | grep '0 users') || false;
