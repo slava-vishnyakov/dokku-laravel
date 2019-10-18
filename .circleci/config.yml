@@ -37,10 +37,11 @@ jobs:
       - run: cd /home/circleci
       - run: sudo rm -rf /home/circleci/.composer
       - run: composer global require laravel/installer
-      - run: export PATH="$PATH:$HOME/.config/composer/vendor/bin"
-      - run: cd /home/circleci
-      - run: /home/circleci/project/dokku-laravel new project1 project1
-      - run: cd project1
+      - run: |
+            export PATH="$PATH:$HOME/.config/composer/vendor/bin";
+            cd /home/circleci;
+            /home/circleci/project/dokku-laravel new project1 project1;
+            cd project1
       - run: docker-compose up -d
       - run: sleep 10
       - run: php artisan serve &
