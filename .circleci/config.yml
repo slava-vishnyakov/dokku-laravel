@@ -42,10 +42,10 @@ jobs:
             cd /home/circleci;
             /home/circleci/project/dokku-laravel new project1 project1;
             cd project1
-      - run: docker-compose up -d
+      - run: cd /home/circleci/project1 && docker-compose up -d
       - run: sleep 10
-      - run: php artisan serve &
+      - run: (cd /home/circleci/project1 && php artisan serve) &
       - run: (curl -s 127.0.0.1:8000 | grep Laravel) || false
-      - run: php artisan migrate
-      - run: echo '<?php echo App\User::count(); ?> users' > resources/views/welcome.blade.php
+      - run: cd /home/circleci/project1 && php artisan migrate
+      - run: echo '<?php echo App\User::count(); ?> users' > /home/circleci/resources/views/welcome.blade.php
       - run: (curl -s 127.0.0.1:8000 | grep '0 users') || false
