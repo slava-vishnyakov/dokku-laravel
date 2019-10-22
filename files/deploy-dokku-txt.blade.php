@@ -57,7 +57,6 @@ dokku elasticsearch:link {{ $domainUnderscores }} {{ $domain }}
 # Redis
 dokku plugin:install https://github.com/dokku/dokku-redis.git redis
 dokku redis:create {{ $domainUnderscores }}
-dokku redis:link {{ $domainUnderscores }} {{ $domain }}
 # locally: composer require predis/predis
 # Change 'config/database.php'
 # add this line after $db = ...
@@ -67,9 +66,11 @@ dokku redis:link {{ $domainUnderscores }} {{ $domain }}
 # 'password' => data_get($redis, 'pass', env('REDIS_PASSWORD', null)),
 # 'port' => data_get($redis, 'port', env('REDIS_PORT', 6379)),
 # delete or rename the Illuminate\Support\Facades\Redis facade alias from config/app.php aliases array
-dokku config:set --no-restart {{ $domain }} REDIS_CLIENT="predis"
 # add REDIS_CLIENT=predis to local .env
 # add REDIS_URL=redis://localhost:6379 to local .env
+# push
+dokku redis:link {{ $domainUnderscores }} {{ $domain }}
+dokku config:set --no-restart {{ $domain }} REDIS_CLIENT="predis"
 
 # Queue (after first deploy)
 # First, install and link redis (see above)
@@ -80,8 +81,9 @@ dokku enter {{ $domain }} cron touch /app/restarting || echo "Could not touch /a
 dokku enter {{ $domain }} queue php artisan queue:restart || echo "Could not send queue:restart to queue"
 
 # Now we're ready to deploy
+# Fix CHECKS file - change "Laravel" to whatever you expect to be on the main page
 # Run locally:
-# git init; echo .idea >> .gitignore; git add .; git commit -m "Initial commit"
+# git init; git add .; git commit -m "Initial commit"
 # git remote add {{ $domain }} dokku@{{ $domain }}:{{ $domain }}
 # git push {{ $domain }} master
 
