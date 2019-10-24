@@ -131,6 +131,11 @@ dokku letsencrypt {{ $domain }}
 dokku config:set --no-restart {{ $domain }} APP_URL=https://{{ $domain }}
 dokku letsencrypt:cron-job --add
 
+# Increase upload size to 50m (also see php.ini file)
+echo 'client_max_body_size 50m;' > /home/dokku/{{ $domain }}/nginx.conf.d/upload.conf
+chown dokku:dokku /home/dokku/{{ $domain }}/nginx.conf.d/upload.conf
+service nginx reload
+
 # Logs
 less /home/dokku/{{ $domain }}/volumes/storage/logs/laravel.log
 dokku logs {{ $domain }} -t
