@@ -18,7 +18,12 @@ dokku config:set --no-restart {{ $domain }} DOKKU_DEFAULT_CHECKS_WAIT=1
 dokku config:set --no-restart {{ $domain }} HEROKU_PHP_PLATFORM_REPOSITORIES=" - https://lang-php.slava.io/dist-heroku-18-stable/packages.json"
 dokku config:set --no-restart {{ $domain }} BUILDPACK_URL=https://github.com/heroku/heroku-buildpack-php
 dokku config:set --no-restart {{ $domain }} STACK="heroku-18"
-dokku config:set --no-restart {{ $domain }} QUEUE_CONNECTION=database
+dokku config:set --no-restart {{ $domain }} DATABASE_CONNECTION=pgsql
+# if you want to use database queue
+# php artisan queue:table
+# dokku config:set --no-restart {{ $domain }} QUEUE_CONNECTION=database
+# if you plan to have redis, then
+# dokku config:set --no-restart {{ $domain }} QUEUE_CONNECTION=redis
 dokku storage:mount {{ $domain }} /home/dokku/{{ $domain }}/volumes/storage/app/:/app/storage/app/
 dokku storage:mount {{ $domain }} /home/dokku/{{ $domain }}/volumes/storage/logs/:/app/storage/logs/
 dokku storage:mount {{ $domain }} /home/dokku/{{ $domain }}/volumes/storage/framework/cache/:/app/storage/framework/cache/
