@@ -95,6 +95,8 @@ dokku enter {{ $domain }} queue php artisan queue:restart || echo "Could not sen
 dokku checks:enable {{ $domain }} web
 dokku checks:skip {{ $domain }} cron,queue
 
+# config/logging -> ['daily'] -> ['single']
+
 # Fix log rotation
 echo -e "/home/dokku/*/volumes/storage/logs/laravel*.log {
 daily
