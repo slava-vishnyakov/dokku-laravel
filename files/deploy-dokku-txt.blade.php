@@ -76,6 +76,11 @@ dokku redis:create {{ $domainUnderscores }}
 # push
 dokku redis:link {{ $domainUnderscores }} {{ $domain }}
 dokku config:set --no-restart {{ $domain }} REDIS_CLIENT="predis"
+# dokku config:set {{ $domain }} SESSION_DRIVER=redis
+# dokku config:set {{ $domain }} CACHE_DRIVER=redis
+# add another section with another database to config/session.php
+# dokku config:set {{ $domain }} SESSION_CONNECTION="session"
+
 
 # Queue (after first deploy)
 # First, install and link redis (see above)
