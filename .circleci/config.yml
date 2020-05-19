@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - checkout
-      - run: sudo apt update
+      - run: sudo apt-get update
       - run: sudo LC_ALL=en_US.UTF-8 add-apt-repository -y ppa:ondrej/php
       - run: sudo apt-get update
       - run: sudo apt install curl php-cli php-mbstring php-pgsql php-zip php-xml php-mbstring git unzip
