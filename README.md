@@ -21,6 +21,9 @@ Create a file `push.sh`:
 CHANGED=$(git diff-index --name-only HEAD --)
 REMOTE="your-domain.com"
 
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ $BRANCH != "master" ]; then echo -e "[!] Not on master branch"; exit 1; fi
+
 if [ $REMOTE == "your-domain.com" ]; then echo -e "[!] Set REMOTE in push.sh"; exit 1; fi
 if [ -n "$CHANGED" ]; then echo -e "[!] Commit your changes first"; exit 1; fi
 
