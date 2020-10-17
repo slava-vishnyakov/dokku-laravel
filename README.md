@@ -2,7 +2,7 @@
 
 ```
 git clone git@github.com:slava-vishnyakov/dokku-laravel.git
-dokku-laravel/dokku-laravel project project.com
+dokku-laravel/dokku-laravel new project project.com
 ```
 
 Creates a `project` folder suitable for deployment to `project.com`
