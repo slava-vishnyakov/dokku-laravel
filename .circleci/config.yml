@@ -33,9 +33,9 @@ jobs:
           php -r "unlink('composer-setup.php');"
       - run: cd /home/circleci/project
       - run: composer install
-      - run: cd /home/circleci
-      #- run: sudo rm -rf /home/circleci/.composer
       - run: composer global require laravel/installer
+      - run: cd /home/circleci
+      - run: sudo rm -rf /home/circleci/.composer
       - run: |
             export PATH="$PATH:$HOME/.config/composer/vendor/bin";
             cd /home/circleci;
