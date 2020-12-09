@@ -2,6 +2,7 @@
 
 ```
 git clone git@github.com:slava-vishnyakov/dokku-laravel.git
+(cd dokku-laravel && composer install)
 dokku-laravel/dokku-laravel new project project.com
 ```
 
