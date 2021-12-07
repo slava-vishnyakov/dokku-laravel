@@ -22,6 +22,11 @@ jobs:
     steps:
       - checkout
       - run: which php; php -v
+      - run: |
+          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');";
+          sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer;
+          sudo chown -R circleci:circleci /home/circleci/.config/composer;
+          php -r "unlink('composer-setup.php');";
       - run: cd /home/circleci/project
       - run: composer install
       - run: composer global require laravel/installer
