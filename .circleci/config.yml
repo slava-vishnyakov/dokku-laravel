@@ -25,7 +25,7 @@ jobs:
       - run: sudo apt-get update
       - run: sudo LC_ALL=en_US.UTF-8 add-apt-repository -y ppa:ondrej/php
       - run: sudo apt-get update
-      - run: sudo apt install curl php-cli php-mbstring php-pgsql php-zip php-xml php-mbstring git unzip
+      - run: sudo apt install curl php8.0-cli php8.0-mbstring php8.0-pgsql php8.0-zip php8.0-xml php8.0-mbstring git unzip
       - run: which php; php -v
       - run: |
           php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');";
