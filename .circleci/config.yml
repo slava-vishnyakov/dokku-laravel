@@ -17,15 +17,10 @@ workflows:
 version: 2
 jobs:
   build:
-    machine:
-      image: ubuntu-1604:201903-01
-
+    docker:
+      - image: cimg/php:8.0.13
     steps:
       - checkout
-      - run: sudo apt-get update
-      - run: sudo LC_ALL=en_US.UTF-8 add-apt-repository -y ppa:ondrej/php
-      - run: sudo apt-get update
-      - run: sudo apt install curl php-cli php-mbstring php-pgsql php-zip php-xml php-mbstring git unzip
       - run: which php; php -v
       - run: |
           php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');";
