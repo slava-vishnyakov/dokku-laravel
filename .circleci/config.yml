@@ -36,7 +36,7 @@ jobs:
       - run: composer install
       - run: composer global require laravel/installer
       - run: cd /home/circleci
-      - run: sudo rm -rf /home/circleci/.composer
+#      - run: sudo rm -rf /home/circleci/.composer
       - run: |
             export PATH="$PATH:$HOME/.config/composer/vendor/bin";
             cd /home/circleci;
