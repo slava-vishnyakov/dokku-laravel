@@ -31,3 +31,6 @@ jobs:
 
 #      - name: "Install dependencies with composer"
 #        run: "composer install --no-interaction --no-progress"
+
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
