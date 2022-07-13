@@ -45,6 +45,7 @@ jobs:
       - run: "(curl -s 127.0.0.1:8000 | grep Laravel) || false"
       - run: "docker-compose up -d"
       - run: "php artisan migrate"
-      - run: "echo '<?php echo App\Models\User::count(); ?> users' > resources/views/welcome.blade.php;"
+      - run: |
+             echo '<?php echo App\Models\User::count(); ?> users' > resources/views/welcome.blade.php;
       - run: "curl -s 127.0.0.1:8000;"
       - run: "(curl -s 127.0.0.1:8000 | grep '0 users') || false;"
