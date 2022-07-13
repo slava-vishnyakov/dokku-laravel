@@ -38,7 +38,7 @@ jobs:
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
 
-      - run: "composer create-project --prefer-dist laravel/laravel project1 project1"
+      - run: "composer create-project --prefer-dist laravel/laravel project1"
       - run: "cd project1"
       - run: "php artisan serve &"
       - run: "curl -s 127.0.0.1:8000"
