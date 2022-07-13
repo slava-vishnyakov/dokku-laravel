@@ -1,0 +1,61 @@
+name: "Run Tests"
+
+on:
+  pull_request:
+    branches:
+      - "*"
+  push:
+    branches:
+      - "*"
+
+jobs:
+  run-tests:
+    runs-on: "ubuntu-20.04"
+
+    steps:
+      - name: "Checkout code"
+        uses: "actions/checkout@v2"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          php-version: "8.0"
+
+      - name: "Cache dependencies installed with composer"
+        uses: "actions/cache@v2"
+        with:
+          path: "~/.composer/cache"
+          key: "php-8.0-composer-locked-${{ hashFiles('composer.lock') }}"
+          restore-keys: "php-8.0-composer-locked-"
+
+      - name: "Install dependencies with composer"
+        run: "composer install --no-interaction --no-progress"
+
+      - name: "Install laravel"
+        run: "composer global require laravel/installer"
+
+#      - name: Setup upterm session
+#        uses: lhotari/action-upterm@v1
+
+      - shell: 'script -q -e -c "bash {0}"'
+        run: "./dokku-laravel new project1 project1"
+
+      - run: "cd project1 && php artisan serve &"
+
+      - run: "sleep 2"
+
+      - run: "curl -s 127.0.0.1:8000"
+
+      - run: "(curl -s 127.0.0.1:8000 | grep Laravel) || false"
+
+      - run: "cd project1 && docker-compose up -d && sleep 5"
+
+      - run: "cd project1 && php artisan migrate"
+
+      - run: |
+             echo '<?php echo App\Models\User::count(); ?> users' > project1/resources/views/welcome.blade.php;
+
+      - run: "curl -s 127.0.0.1:8000"
+
+      - run: "(curl -s 127.0.0.1:8000 | grep '0 users') || false"
