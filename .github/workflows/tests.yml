@@ -38,14 +38,24 @@ jobs:
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
 
-      - run: "composer create-project --prefer-dist laravel/laravel project1"
+      - shell: 'script -q -e -c "bash {0}"'
+        run: "./dokku-laravel new project1 project1"
+
       - run: "cd project1"
+
       - run: "php artisan serve &"
+
       - run: "curl -s 127.0.0.1:8000"
+
       - run: "(curl -s 127.0.0.1:8000 | grep Laravel) || false"
+
       - run: "docker-compose up -d"
+
       - run: "php artisan migrate"
+
       - run: |
              echo '<?php echo App\Models\User::count(); ?> users' > resources/views/welcome.blade.php;
-      - run: "curl -s 127.0.0.1:8000;"
-      - run: "(curl -s 127.0.0.1:8000 | grep '0 users') || false;"
+
+      - run: "curl -s 127.0.0.1:8000"
+
+      - run: "(curl -s 127.0.0.1:8000 | grep '0 users') || false"
