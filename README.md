@@ -10,7 +10,7 @@ Creates a `project` folder suitable for deployment to `project.com`
 
 See the generated `dokku-deploy.txt` file for complete instructions.
 
-[![CircleCI](https://circleci.com/gh/slava-vishnyakov/dokku-laravel/tree/master.svg?style=svg)](https://circleci.com/gh/slava-vishnyakov/dokku-laravel/tree/master)
+[![Run Tests](https://github.com/slava-vishnyakov/dokku-laravel/actions/workflows/tests.yml/badge.svg)](https://github.com/slava-vishnyakov/dokku-laravel/actions/workflows/tests.yml)
 
 # Production assets builds
 
