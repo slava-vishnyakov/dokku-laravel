@@ -29,8 +29,22 @@ jobs:
           key: "php-8.0-composer-locked-${{ hashFiles('composer.lock') }}"
           restore-keys: "php-8.0-composer-locked-"
 
-#      - name: "Install dependencies with composer"
-#        run: "composer install --no-interaction --no-progress"
+      - name: "Install dependencies with composer"
+        run: "composer install --no-interaction --no-progress"
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
+      - name: "Install laravel"
+        run: "composer global require laravel/installer"
+
+#      - name: Setup upterm session
+#        uses: lhotari/action-upterm@v1
+
+      - run: "./dokku-laravel new project1 project1"
+      - run: "cd project1"
+      - run: "php artisan serve &"
+      - run: "curl -s 127.0.0.1:8000"
+      - run: "(curl -s 127.0.0.1:8000 | grep Laravel) || false"
+      - run: "docker-compose up -d"
+      - run: "php artisan migrate"
+      - run: "echo '<?php echo App\Models\User::count(); ?> users' > resources/views/welcome.blade.php;"
+      - run: "curl -s 127.0.0.1:8000;"
+      - run: "(curl -s 127.0.0.1:8000 | grep '0 users') || false;"
