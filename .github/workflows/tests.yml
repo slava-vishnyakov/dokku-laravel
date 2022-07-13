@@ -38,7 +38,9 @@ jobs:
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
 
-      - run: "./dokku-laravel new project1 project1"
+      - run: |
+              sed -i "s/\$process->setTty(true);/\/\/\$process->setTty(true);/g" ./vendor/laravel/installer/src/NewCommand.php &&
+              ./dokku-laravel new --force project1 project1
       - run: "cd project1"
       - run: "php artisan serve &"
       - run: "curl -s 127.0.0.1:8000"
