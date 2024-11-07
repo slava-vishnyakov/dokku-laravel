@@ -27,6 +27,9 @@ jobs:
           coverage: "none"
           php-version: "8.2"
 
+      - name: Set up Docker Buildx
+        uses: "docker/setup-buildx-action@v3"
+
       - name: "Cache dependencies installed with composer"
         uses: "actions/cache@v4"
         with:
