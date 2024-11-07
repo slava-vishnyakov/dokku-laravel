@@ -57,7 +57,7 @@ jobs:
 
       - run: "(curl -s 127.0.0.1:8000 | grep Laravel) || false"
 
-      - run: "cd project1 && docker-compose up -d && sleep 5"
+      - run: "cd project1 && docker compose up -d && sleep 5"
 
       - run: "cd project1 && php artisan migrate"
 
