@@ -205,8 +205,8 @@ class InstallLaravel
 
     private function updateTrustProxies()
     {
-        $this->fileInsertAfter($this->projectName . '/app/Http/Middleware/TrustProxies.php',
-            'protected $proxies',
-            "= [\n        '172.17.0.1'\n    ]");
+        $this->fileInsertAfter($this->projectName . '/bootstrap/app.php',
+            '->withMiddleware(function (Middleware $middleware) {',
+            "\n" . '        $middleware->trustProxies(at: \'*\');');
     }
 }
