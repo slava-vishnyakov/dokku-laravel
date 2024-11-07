@@ -49,7 +49,7 @@ class NewCommand extends Command
      */
     protected function runCommands(array $commands, OutputInterface $output, $directory)
     {
-        $process = new Process(implode(' && ', $commands), $directory, null, null, null);
+        $process = new Process(["bash", "-lc", escapeshellarg(implode(' && ', $commands))], $directory, null, null, null);
 
         if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
             $process->setTty(true);
