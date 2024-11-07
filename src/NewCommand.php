@@ -26,11 +26,9 @@ class NewCommand extends Command
         $name = $input->getArgument('name');
         $domain = $input->getArgument('domain');
 
-        $commands = [
-            'laravel new ' . $name
-        ];
+        $command = ['laravel', 'new', $name];
 
-        $this->runCommands($commands, $output, $directory);
+        $this->runCommands($command, $output, $directory);
 
         $n = new InstallLaravel($name, $domain);
         $n->run();
@@ -47,9 +45,9 @@ class NewCommand extends Command
      * @param OutputInterface $output
      * @param $directory
      */
-    protected function runCommands(array $commands, OutputInterface $output, $directory)
+    protected function runCommands(array $command, OutputInterface $output, $directory)
     {
-        $process = new Process(["bash", "-lc", escapeshellarg(implode(' && ', $commands))], $directory, null, null, null);
+        $process = new Process($command, $directory, null, null, null);
 
         if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
             $process->setTty(true);
