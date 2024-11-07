@@ -35,8 +35,8 @@ jobs:
       - name: "Install laravel"
         run: "composer global require laravel/installer"
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
 
       - shell: 'script -q -e -c "bash {0}"'
         run: "./dokku-laravel new project1 project1"
