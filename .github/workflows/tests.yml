@@ -39,7 +39,7 @@ jobs:
       #   uses: mxschmitt/action-tmate@v3
 
       - shell: 'script -q -e -c "bash {0}"'
-        run: "./dokku-laravel new project1 project1"
+        run: "./dokku-laravel new project1 project1 --no-interaction --migratoro"
 
       - run: "cd project1 && php artisan serve &"
 
