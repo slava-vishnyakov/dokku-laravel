@@ -113,7 +113,7 @@ class InstallLaravel
         $exampleFile = $this->projectName . '/.env.example';
         $envFile = $this->projectName . '/.env';
         foreach([$envFile, $exampleFile] as $file) {
-            $dbFragment = "DB_CONNECTION=pgsql\nDB_URL=postgres://webapp:secret@postgres:5432/webapp?sslmode=disable";
+            $dbFragment = "DB_CONNECTION=pgsql\nDB_URL=postgres://webapp:secret@localhost:5432/webapp?sslmode=disable";
             $this->fileReplaceBetween($file, 'DB_CONNECTION', 'DB_PASSWORD=', "{$dbFragment}\n");
             $this->fileReplace($file, "DB_PASSWORD=\n", "");
             $this->fileReplaceRegex($file, "/APP_URL=.*?\n/", "APP_URL=http://127.0.0.1:8081\n");
