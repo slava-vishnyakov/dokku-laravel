@@ -15,10 +15,10 @@
   },
   "require": {
     "ext-zip": "*",
-    "guzzlehttp/guzzle": "~6.0",
-    "symfony/console": "~3.0|~4.0",
-    "symfony/filesystem": "~3.0|~4.0",
-    "symfony/process": "~3.0|~4.0"
+    "guzzlehttp/guzzle": "~7.0",
+    "symfony/console": "~7.1",
+    "symfony/filesystem": "~7.1",
+    "symfony/process": "~7.1"
   },
   "bin": [
     "dokku-laravel"
