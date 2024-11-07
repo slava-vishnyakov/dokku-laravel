@@ -4,35 +4,44 @@ namespace DokkuLaravel;
 
 use RuntimeException;
 
-class InstallLaravel
+class InstallLaravel2
 {
     private $projectName;
     private $domain;
+    private $installMigratoro;
 
-    public function __construct($projectName, $domain)
+    public function __construct($projectName, $domain, $installMigratoro=false)
     {
         $this->projectName = $projectName;
         $this->domain = $domain;
-        $this->stack = 'heroku-18'; # 'cedar-14';
+        $this->installMigratoro = $installMigratoro;
     }
 
     public function run()
     {
-        $postgresVersion = '11.4';
-        $postgresPort = mt_rand(5234, 5600);
+        $postgresVersion = '16';
+        $postgresPort = random_int(5234, 5234+1000);
         $testDbPostgresPort = $postgresPort + 1;
+        $redisVersion = '7.2';
+        $redisPort = random_int(6379, 6379+1000);
+        $testRedisPort = $redisPort + 1;
+        $elasticVersion = '8.10.4';
+        $elasticPort = random_int(9200, 9200+1000);
+        $testElasticPort = $elasticPort + 1;
 
-        $this->createDockerCompose($postgresPort, $postgresVersion, $testDbPostgresPort);
-        $this->updateDbConfig();
-        $this->updateEnv($postgresPort);
-        $this->updatePhpUnitXml($testDbPostgresPort);
+        $this->createDockerCompose(get_defined_vars());
+        $this->createDockerignore();
+        $this->updateEnv($postgresPort, $redisPort);
+        $this->updatePhpUnitXml($testDbPostgresPort, $testRedisPort);
         $this->updatePackageJson();
         $this->updateTrustProxies();
         $this->updateTestCase();
-        $this->createDokkuDeployFile($postgresVersion);
-        $this->createDokkuScaleFile();
+        $this->createCaproverDeployFile(get_defined_vars());
         $this->miscFiles();
         $this->installIdeHelpers();
+        if($this->installMigratoro) {
+            $this->installMigratoro();
+        }
 
     }
 
@@ -58,12 +67,19 @@ class InstallLaravel
         file_put_contents($filename, $newContent);
     }
 
+    function fileReplaceRegex($filename, $search, $replace)
+    {
+        $text = file_get_contents($filename);
+        $newContent = preg_replace($search, $replace, $text);
+        file_put_contents($filename, $newContent);
+    }
+
     function fileInsertAfter($filename, $start, $replace)
     {
         $text = file_get_contents($filename);
         $startI = strpos($text, $start);
         if ($startI === false) {
-            throw new RuntimeException("$startI not found in $filename");
+            throw new RuntimeException("String '$startI' not found in file '$filename'");
         }
         $startI += strlen($start);
         $endI = $startI;
@@ -78,43 +94,43 @@ class InstallLaravel
 
     public function updatePackageJson()
     {
-        $this->fileInsertAfter($this->projectName . '/package.json', "\"scripts\": {", $this->packageJsonFile());
+        $this->fileReplaceBetween($this->projectName . '/package.json', "\"scripts\": {", "},", $this->packageJsonFile());
     }
 
-    public function updatePhpUnitXml($testDbPostgresPort)
+    public function updatePhpUnitXml($testDbPostgresPort, $testRedisPort)
     {
         $connection = "postgres://webapp:secret@localhost:$testDbPostgresPort/webapp?sslmode=disable";
-        $replace = "\n        <env name=\"DATABASE_URL\" value=\"{$connection}\"/>";
+        $replace = "\n        <server name=\"DB_URL\" value=\"{$connection}\"/>\n" .
+            "        <server name=\"DB_CONNECTION\" value=\"pgsql\"/>\n" .
+            "        <server name=\"REDIS_PORT\" value=\"{$testRedisPort}\"/>\n"
+        ;
         $this->fileInsertAfter($this->projectName . '/phpunit.xml', '<php>',
             $replace);
     }
 
-    public function updateEnv($postgresPort)
+    public function updateEnv($postgresPort, $redisPort)
     {
-        $dbFragment = "DATABASE_URL=postgres://webapp:secret@localhost:$postgresPort/webapp?sslmode=disable";
-        $this->fileReplaceBetween($this->projectName . '/.env.example', 'DB_CONNECTION', 'DB_PASSWORD=', "{$dbFragment}\n");
-        $this->fileReplaceBetween($this->projectName . '/.env', 'DB_CONNECTION', 'DB_PASSWORD=', "{$dbFragment}\n");
-        $this->fileReplace($this->projectName . '/.env', "DB_PASSWORD=\n", "");
+        $exampleFile = $this->projectName . '/.env.example';
+        $envFile = $this->projectName . '/.env';
+        foreach([$envFile, $exampleFile] as $file) {
+            $dbFragment = "DB_CONNECTION=pgsql\nDB_URL=postgres://webapp:secret@postgres:5432/webapp?sslmode=disable";
+            $this->fileReplaceBetween($file, 'DB_CONNECTION', 'DB_PASSWORD=', "{$dbFragment}\n");
+            $this->fileReplace($file, "DB_PASSWORD=\n", "");
+            $this->fileReplaceRegex($file, "/APP_URL=.*?\n/", "APP_URL=http://127.0.0.1:8081\n");
+            $this->fileReplace($file, "REDIS_HOST=redis", "REDIS_HOST=localhost");
+            $this->fileReplace($file, "REDIS_PORT=6379", "REDIS_PORT=$redisPort");
+        }
     }
 
-    public function createDockerCompose($postgresPort, $postgresVersion, $testDbPostgresPort)
+    public function createDockerCompose($vars)
     {
-        $dockerCompose = $this->dockerComposeFile($postgresPort, $postgresVersion, $testDbPostgresPort);
+        $dockerCompose = $this->dockerComposeFile($vars);
         file_put_contents($this->projectName . '/docker-compose.yml', $dockerCompose);
-    }
-
-    public function updateDbConfig()
-    {
-        $dbFragment = file_get_contents(__DIR__ . '/../files/database.php.fragment');;
-        $this->fileReplaceBetween($this->projectName . '/config/database.php', '<?php', "\n    ],", $dbFragment);
     }
 
     private function installIdeHelpers()
     {
         system('cd ' . $this->projectName . ' && composer require barryvdh/laravel-ide-helper');
-        $start = "         * Package Service Providers...\n         */\n";
-        $replace = "        \\Barryvdh\\LaravelIdeHelper\\IdeHelperServiceProvider::class,\n        ";
-        $this->fileInsertAfter($this->projectName . '/config/app.php', $start, $replace);
         $this->fileInsertAfter($this->projectName . '/composer.json',
             '"Illuminate\\\\Foundation\\\\ComposerScripts::postAutoloadDump",',
             "\n            \"php artisan ide-helper:generate\",
@@ -133,15 +149,9 @@ class InstallLaravel
         return $text;
     }
 
-    public function dockerComposeFile($postgresPort, $postgresVersion, $testDbPostgresPort)
+    public function dockerComposeFile($vars)
     {
-        return $this->blade('docker-compose-yml',
-            [
-                'postgresPort' => $postgresPort,
-                'postgresVersion' => $postgresVersion,
-                'testDbPostgresPort' => $testDbPostgresPort
-            ]
-        );
+        return $this->blade('docker-compose-yml', $vars);
     }
 
     public function testCaseFile()
@@ -151,56 +161,52 @@ class InstallLaravel
 
     public function packageJsonFile()
     {
-        return str_replace('{DOMAIN}', $this->domain, '
-        "serve": "php artisan serve",
-        "push-{DOMAIN}": "git push {DOMAIN} master",
-        "queue": "php artisan queue:work --tries=1",
-        "start-db": "docker-compose up",
-        "stop-db": "docker-compose stop",
-        "migrate": "php artisan migrate",
-        "migrate:rollback": "php artisan migrate:rollback",
-        "composer:update": "composer update",
-        "composer:install": "composer install",');
+        $domainDashes = preg_replace('#[^A-Za-z0-9]#', '-', $this->domain);
+        $actions = <<<"EOF"
+        "scripts": {
+                "start-compose": "docker compose up",
+                "dev": "docker compose exec php-nginx npm install; docker compose exec php-nginx ./node_modules/vite/bin/vite.js --host",
+                "stop-compose": "docker compose stop",
+                "deploy": "caprover deploy -n CAPROVER_HOST_REPLACE_ME -a CAPROVER_APP_NAME_REPLACE_ME -b master",
+                "migrator": "docker compose exec php-nginx php artisan migrator && docker compose exec php-nginx php artisan ide-helper:model --reset --write",
+                "queue": "docker compose exec php-nginx php artisan queue:work --tries=1",
+                "migrate": "docker compose exec php-nginx php artisan migrate",
+                "migrate:rollback": "docker compose exec php-nginx php artisan migrate:rollback",
+                "build": "docker compose exec php-nginx npm install; docker compose exec php-nginx ./node_modules/vite/bin/vite build",
+                "bash": "docker compose exec php-nginx bash"
+            
+        EOF;
+        return str_replace('{DOMAIN_DASH}', $domainDashes, $actions);
     }
 
-    public function createDokkuScaleFile()
+    public function createCaproverDeployFile($vars)
     {
-        file_put_contents($this->projectName . '/DOKKU_SCALE', "web=1\ncron=1\nqueue=1\n");
+        file_put_contents($this->projectName . '/caprover-deploy.txt', $this->deployCaproverFile($vars));
     }
 
-    public function createDokkuDeployFile($postgresVersion)
+    public function deployCaproverFile($vars)
     {
-        file_put_contents($this->projectName . '/dokku-deploy.txt', $this->deployDokkuFile($postgresVersion));
-    }
-
-    public function deployDokkuFile($postgresVersion)
-    {
-        $key = base64_encode(random_bytes(32));
-        $domainUnderscores = preg_replace('#[^A-Za-z0-9]#', '_', $this->domain);
+        $domainDashes = preg_replace('#[^A-Za-z0-9]#', '-', $this->domain);
         $domain = $this->domain;
-        return $this->blade('deploy-dokku-txt',
-            [
-                'postgresVersion' => $postgresVersion,
-                'key' => $key,
-                'domainUnderscores' => $domainUnderscores,
-                'domain' => $domain,
-            ]
-        );
+        return $this->blade('deploy-caprover-txt', array_merge($vars, ['domain' => $domain, 'domainDashes' => $domainDashes]));
     }
 
     public function miscFiles()
     {
-        copy(__DIR__ . '/../files/Procfile', $this->projectName . '/Procfile');
-        copy(__DIR__ . '/../files/cron.sh', $this->projectName . '/cron.sh');
-        chmod($this->projectName . '/cron.sh', 0755);
+        mkdir($this->projectName . '/resources/docker/');
+        mkdir($this->projectName . '/resources/docker/local/');
+        $files = [
+            'cron.sh', 'entrypoint.sh', 'nginx.conf.tpl', 'php.ini', 'php-fpm.conf.tpl', 'queue.sh', 'supervisor.conf',
+            'local/nginx.conf', 'local/php.ini', 'local/php-fpm.conf', 'local/supervisor.conf'
+        ];
+        foreach ($files as $file) {
+            copy(__DIR__ . '/../files/docker/' . $file, $this->projectName . '/resources/docker/' . $file);
+        }
+        chmod($this->projectName . '/resources/docker/queue.sh', 0755);
+        chmod($this->projectName . '/resources/docker/cron.sh', 0755);
 
-        copy(__DIR__ . '/../files/queue.sh', $this->projectName . '/queue.sh');
-        chmod($this->projectName . '/queue.sh', 0755);
-
-        copy(__DIR__ . '/../files/php.ini', $this->projectName . '/php.ini');
-        copy(__DIR__ . '/../files/CHECKS', $this->projectName . '/CHECKS');
-
-        copy(__DIR__ . '/../files/app.json', $this->projectName . '/app.json');
+        copy(__DIR__ . '/../files/Dockerfile', $this->projectName . '/Dockerfile');
+        copy(__DIR__ . '/../files/docker/local/Dockerfile.php-nginx', $this->projectName . '/Dockerfile.php-nginx');
     }
 
     private function updateTrustProxies()
@@ -208,5 +214,27 @@ class InstallLaravel
         $this->fileInsertAfter($this->projectName . '/bootstrap/app.php',
             '->withMiddleware(function (Middleware $middleware) {',
             "\n" . '        $middleware->trustProxies(at: \'*\');');
+    }
+
+    private function createDockerignore()
+    {
+        copy(__DIR__ . '/../files/.dockerignore', $this->projectName . '/.dockerignore');
+    }
+
+    private function installMigratoro()
+    {
+        print("Installing Migratoro...\n");
+        $result = system('cd ' . $this->projectName . ' && touch database/schema.txt');
+        if($result === false) {
+            throw new RuntimeException("Failed to create database/schema.txt");
+        }
+        $result = system('cd ' . $this->projectName . ' && composer config repositories.migratoro vcs https://github.com/niogu/migratoro');
+        if($result === false) {
+            throw new RuntimeException("Failed to add migratoro repository");
+        }
+        $result = system('cd ' . $this->projectName . ' && composer require --dev niogu/migratoro:dev-master');
+        if($result === false) {
+            throw new RuntimeException("Failed to install migratoro");
+        }
     }
 }
