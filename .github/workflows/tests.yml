@@ -10,24 +10,24 @@ on:
 
 jobs:
   run-tests:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-24.04"
 
     steps:
       - name: "Checkout code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
           coverage: "none"
-          php-version: "8.0"
+          php-version: "8.2"
 
       - name: "Cache dependencies installed with composer"
-        uses: "actions/cache@v2"
+        uses: "actions/cache@v4"
         with:
           path: "~/.composer/cache"
-          key: "php-8.0-composer-locked-${{ hashFiles('composer.lock') }}"
-          restore-keys: "php-8.0-composer-locked-"
+          key: "php-8.2-composer-locked-${{ hashFiles('composer.lock') }}"
+          restore-keys: "php-8.2-composer-locked-"
 
       - name: "Install dependencies with composer"
         run: "composer install --no-interaction --no-progress"
