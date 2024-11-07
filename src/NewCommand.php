@@ -19,7 +19,7 @@ class NewCommand extends Command
             ->addArgument('domain', InputArgument::REQUIRED);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $directory = getcwd();
 
@@ -37,6 +37,8 @@ class NewCommand extends Command
 
         $output->writeln('<info>Installed</info>');
         $output->writeln("<info>cd {$name}; cat dokku-deploy.txt</info>");
+
+        return Command::SUCCESS;
     }
 
 
