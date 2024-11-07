@@ -4,7 +4,7 @@ namespace DokkuLaravel;
 
 use RuntimeException;
 
-class InstallLaravel2
+class InstallLaravel
 {
     private $projectName;
     private $domain;
