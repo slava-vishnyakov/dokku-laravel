@@ -52,7 +52,7 @@ class NewCommand extends Command
                 continue;
             }
             if($value !== null && $value !== false) {
-                if(in_array($option, ['branch', 'github', 'organization', 'database', 'stack'])) {
+                if(in_array($option, ['branch', 'github', 'organization', 'database'])) {
                     $command[] = '--' . $option;
                     $command[] = $value;
                 } else {
@@ -62,7 +62,7 @@ class NewCommand extends Command
         }
 
 
-        $isSuccess = $this->runCommand($command, $output, $directory);
+        $isSuccess = $this->runCommand($command, $output, $directory, $input);
         if(!$isSuccess) {
             $output->writeln('<error>Failed to run command</error>');
             return 1;
@@ -88,12 +88,14 @@ class NewCommand extends Command
      * @param OutputInterface $output
      * @param $directory
      */
-    protected function runCommand(array $command, OutputInterface $output, $directory)
+    protected function runCommand(array $command, OutputInterface $output, $directory, $input)
     {
         $process = new Process($command, $directory, null, null, null);
 
-        if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
-            $process->setTty(true);
+        if(!$input->getOption('no-interaction')) {
+            if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
+                $process->setTty(true);
+            }
         }
 
         $process->run(function ($type, $line) use ($output) {

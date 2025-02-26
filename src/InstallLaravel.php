@@ -130,7 +130,7 @@ class InstallLaravel
 
     private function installIdeHelpers()
     {
-        system('cd ' . $this->projectName . ' && composer require barryvdh/laravel-ide-helper');
+        system('cd ' . $this->projectName . ' && composer require --dev barryvdh/laravel-ide-helper');
         $this->fileInsertAfter($this->projectName . '/composer.json',
             '"Illuminate\\\\Foundation\\\\ComposerScripts::postAutoloadDump",',
             "\n            \"php artisan ide-helper:generate\",
