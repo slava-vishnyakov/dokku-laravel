@@ -98,6 +98,8 @@ class NewCommand extends Command
             }
         }
 
+        $process->setTimeout(5*60);
+
         $process->run(function ($type, $line) use ($output) {
             $output->write($line);
         });
